@@ -1,9 +1,11 @@
 package HttpServer;
 
+import Stock;
 import com.sun.net.httpserver.*;
 
 import java.io.*;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 
 public class SimpleHTTPServer extends Thread {
@@ -38,6 +40,7 @@ public class SimpleHTTPServer extends Thread {
             String username = request.substring(0,index) ;
             String password = request.substring(index+1,request.length());
             System.out.println("USERNAME is :"+username+"PASSWORD IS :"+password);
+
             if(db.IsUsernameExists(username)){
                 String response = "username exists";
                 sendResponse(response,t);
@@ -58,11 +61,31 @@ public class SimpleHTTPServer extends Thread {
             System.out.println("==========================");
             System.out.println(request);
             System.out.println("==========================");
-            String response = "World";
-            t.sendResponseHeaders(200, response.length());
-            OutputStream os = t.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
+            String[] strArray = request.toString().split(",");
+            ArrayList<StockState> stateList = new ArrayList<>();
+            for (String aStrArray : strArray) {
+                String[] nameAndVal = aStrArray.split(":");
+                String name = nameAndVal[0];
+                double value = Double.parseDouble(nameAndVal[1]);
+                Stock stock = new Stock(name);
+                StockState state = new StockState(stock, value);
+                stateList.add(state);
+            }
+            int id = db.insert(stateList);
+            int index = request.indexOf("&");
+            String username = request.substring(0,index) ;
+            String password = request.substring(index+1,request.length());
+            System.out.println("USERNAME is :"+username+"PASSWORD IS :"+password);
+
+            if(db.IsUsernameExists(username)){
+                String response = "username exists";
+                sendResponse(response,t);
+            }
+            else{
+                db.insert(username,password);
+                String response = "Registration completed";
+                sendResponse(response,t);
+            }
         }
     }
     private static void sendResponse(String response, HttpExchange t) throws IOException {

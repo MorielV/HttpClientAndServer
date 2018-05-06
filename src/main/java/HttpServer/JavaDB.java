@@ -37,11 +37,21 @@ public class JavaDB {
         }
     }
 
-    public void insert(String username, String password) {
+    public int insert( ArrayList<StockState> stateList ) {
         try {
             PreparedStatement inserted = dbcon.prepareStatement("INSERT INTO  Accounts(username, password) VALUES ('" + username + "','" + password + "')");
             inserted.executeUpdate();
             System.out.println("insert completed");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public void delete(String username){
+        try {
+            PreparedStatement deleted = dbcon.prepareStatement("DELETE FROM Accounts WHERE username ='" + username + "'");
+            deleted.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }

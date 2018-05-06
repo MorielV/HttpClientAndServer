@@ -1,31 +1,61 @@
 package HttpClient;
 
+
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.logging.Logger;
 
 import static java.util.logging.Level.SEVERE;
 
 class SimpleHttpClient {
-    private static final Logger logger = Logger.getLogger("client_logger");
-    private static  Scanner scanner;
+    private static Logger logger;
+    private static Scanner scanner;
     private HttpURLConnection con;
     private URL url;
 
-    void connectToServer() {
-        try {
-            scanner= new Scanner(System.in);
-            System.out.println("Welcome!\nLogin to Existing Account? (y/n):");
+
+    SimpleHttpClient() {
+        logger = Logger.getLogger("client_logger");
+    }
+
+    void connectToServer() throws IOException {
+        boolean tryAgain = true;
+        while (tryAgain) {
+            tryAgain = false;
+            scanner = new Scanner(System.in);
+            System.out.println("Welcome!\nWhat you wish to do:(choose between 1 to 4) \n" +
+                    "1. Register your stock portfolio\n" +
+                    "2. Update your stock portfolio\n" +
+                    "3. Check your current portfolio value\n" +
+                    "4. Ask for simple buying recommendations");
             String input = scanner.next();
-            if (input.equals("n"))
-                while(!registerNewUser()){
-                    System.out.println("please try again (^.^)");
-                }
-            //loginExistingUser();
+            switch (input) {
+                case "1":
+                    int clientId = handleRegister();   //clientId is the response from the server
+                    System.out.println("Registration Complete, your Client ID is" + clientId);
+                    break;
+                case "2": //TODO:
+                    break;
+                case "3"://TODO:
+                    break;
+                case "4"://TODO:
+                    break;
+                default:
+                    tryAgain = true;
+                    System.out.println("Wrong input , please try again (^.^)");
+            }
+        }
+//        if (input.equals("n"))
+//            while (!registerNewUser()) {
+//                System.out.println("please try again (^.^)");
+//            }
+        //loginExistingUser();
 
 //            String request = "Hello";
 //            //con.setRequestProperty("content-length", String.valueOf(test.length()));
@@ -52,36 +82,26 @@ class SimpleHttpClient {
 //            System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 //            System.out.println(response);
 //            System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-
-        } catch (IOException e) {
-            logger.log(SEVERE, "url error");
-        }
-
     }
 
-    private void loginExistingUser() throws IOException {
-        url = new URL("http://localhost:8080/login");
-        optimizeConnection();
-        con.setRequestMethod("POST");
+    private int handleRegister() throws IOException {
+        scanner = new Scanner(System.in);
+        System.out.println("Enter All your stocks states(name:value) separated by comma\n" +
+                "(for example - Fyber:12.5,Teva:3.2, ...)");
 
-
-    }
-
-    private boolean registerNewUser() throws IOException {
-        String username;
-        String password;
-        scanner= new Scanner(System.in);
-        System.out.println("Enter your Username to register");
-        username = scanner.nextLine();
-        System.out.println("Enter your Password to register");
-        password = scanner.nextLine();
-        String dataToSend = username + "&" + password;
-        url = new URL("http://localhost:8080/login");
+        String dataToSend = scanner.nextLine();
+//        scanner = new Scanner(System.in);
+//        System.out.println("Enter your Username to register");
+//        username = scanner.nextLine();
+//        System.out.println("Enter your Password to register");
+//        password = scanner.nextLine();
+//        String dataToSend = username + "&" + password;
+        url = new URL("http://localhost:8080/");
         optimizeConnection();
         sendRequest("POST", dataToSend);
         StringBuilder response = getResponse();
         System.out.println(response);
-        return response.toString().equals("Registration completed");
+        return Integer.parseInt(response.toString());
     }
 
     /**
