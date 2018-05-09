@@ -1,6 +1,5 @@
 package HttpServer;
 
-import Stock;
 import com.sun.net.httpserver.*;
 
 import java.io.*;
@@ -10,26 +9,19 @@ import java.util.concurrent.Executors;
 
 public class SimpleHTTPServer extends Thread {
     private static final int N_THREADS = 10000;
-    private static  final JavaDB db = new JavaDB();
+    private static final JavaDB db = new JavaDB();
+
     public static void main(String args[]) throws IOException {
 
-
-
-        //////////////////////////////////////////////
-
-
-
-        ////////////////////////////////////////////////
-
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
-        HttpContext context = server.createContext("/", new myHandler());
-        server.createContext("/login", new loginHandler());
+        HttpContext context = server.createContext("/", new registerHandler());
+       // server.createContext("/login", new loginHandler());
         server.createContext("/info", new InfoHandler());
         server.createContext("/get", new GetHandler());
         server.setExecutor(Executors.newFixedThreadPool(N_THREADS)); // creates a concurrent executor
         server.start();
     }
-
+/*
     static class loginHandler implements HttpHandler {
         public void handle(HttpExchange t) throws IOException {
             StringBuilder request = getRequest(t);
@@ -37,64 +29,55 @@ public class SimpleHTTPServer extends Thread {
             System.out.println(request);
             System.out.println("==========================");
             int index = request.indexOf("&");
-            String username = request.substring(0,index) ;
-            String password = request.substring(index+1,request.length());
-            System.out.println("USERNAME is :"+username+"PASSWORD IS :"+password);
+            String username = request.substring(0, index);
+            String password = request.substring(index + 1, request.length());
+            System.out.println("USERNAME is :" + username + "PASSWORD IS :" + password);
 
-            if(db.IsUsernameExists(username)){
+            if (db.IsUsernameExists(username)) {
                 String response = "username exists";
-                sendResponse(response,t);
-            }
-            else{
-                db.insert(username,password);
+                sendResponse(response, t);
+            } else {
+                db.insert(username, password);
                 String response = "Registration completed";
-                sendResponse(response,t);
+                sendResponse(response, t);
             }
         }
 
 
     }
-
-    static class myHandler implements HttpHandler {
+*/
+    //register new user
+    static class registerHandler implements HttpHandler {
         public void handle(HttpExchange t) throws IOException {
             StringBuilder request = getRequest(t);
             System.out.println("==========================");
             System.out.println(request);
             System.out.println("==========================");
             String[] strArray = request.toString().split(",");
-            ArrayList<StockState> stateList = new ArrayList<>();
+
+            int id = db.addUser();
             for (String aStrArray : strArray) {
                 String[] nameAndVal = aStrArray.split(":");
                 String name = nameAndVal[0];
                 double value = Double.parseDouble(nameAndVal[1]);
                 Stock stock = new Stock(name);
                 StockState state = new StockState(stock, value);
-                stateList.add(state);
+                db.addState(name, value , id);
             }
-            int id = db.insert(stateList);
-            int index = request.indexOf("&");
-            String username = request.substring(0,index) ;
-            String password = request.substring(index+1,request.length());
-            System.out.println("USERNAME is :"+username+"PASSWORD IS :"+password);
-
-            if(db.IsUsernameExists(username)){
-                String response = "username exists";
-                sendResponse(response,t);
-            }
-            else{
-                db.insert(username,password);
-                String response = "Registration completed";
-                sendResponse(response,t);
-            }
+            String response = String.valueOf(id);
+            sendResponse(response, t);
         }
     }
+
     private static void sendResponse(String response, HttpExchange t) throws IOException {
         t.sendResponseHeaders(200, response.length());
         OutputStream os = t.getResponseBody();
         os.write(response.getBytes());
         os.close();
     }
+
     private static StringBuilder getRequest(HttpExchange t) throws IOException {
+        System.out.println("getting request!!");
         BufferedReader in = new BufferedReader(new InputStreamReader(t.getRequestBody()));
         String inputLine;
         StringBuilder request = new StringBuilder();
@@ -104,7 +87,7 @@ public class SimpleHTTPServer extends Thread {
         in.close();
         return request;
     }
-
+    //TODO: delete this
     static class InfoHandler implements HttpHandler {
         public void handle(HttpExchange t) throws IOException {
             String response = "Use /get to download a PDF";
@@ -114,7 +97,7 @@ public class SimpleHTTPServer extends Thread {
             os.close();
         }
     }
-
+//TODO: delete this
     static class GetHandler implements HttpHandler {
         public void handle(HttpExchange t) throws IOException {
 

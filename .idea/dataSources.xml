@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="HttpDB" uuid="d720dd50-7555-4705-8c30-d7f6be3b03ed">
+    <data-source source="LOCAL" name="HttpDB" uuid="c792318e-2da0-4f54-a4e7-7a589b1a287d">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/src/main/java/HttpClient/HttpDB</jdbc-url>
+      <jdbc-url>jdbc:sqlite:HttpDB</jdbc-url>
       <driver-properties>
         <property name="enable_load_extension" value="true" />
       </driver-properties>

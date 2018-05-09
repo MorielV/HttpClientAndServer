@@ -6,6 +6,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -24,7 +25,7 @@ class SimpleHttpClient {
         logger = Logger.getLogger("client_logger");
     }
 
-    void connectToServer() throws IOException {
+    void connectToServer(){
         boolean tryAgain = true;
         while (tryAgain) {
             tryAgain = false;
@@ -84,7 +85,7 @@ class SimpleHttpClient {
 //            System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     }
 
-    private int handleRegister() throws IOException {
+    private int handleRegister() {
         scanner = new Scanner(System.in);
         System.out.println("Enter All your stocks states(name:value) separated by comma\n" +
                 "(for example - Fyber:12.5,Teva:3.2, ...)");
@@ -96,12 +97,17 @@ class SimpleHttpClient {
 //        System.out.println("Enter your Password to register");
 //        password = scanner.nextLine();
 //        String dataToSend = username + "&" + password;
-        url = new URL("http://localhost:8080/");
-        optimizeConnection();
-        sendRequest("POST", dataToSend);
-        StringBuilder response = getResponse();
-        System.out.println(response);
-        return Integer.parseInt(response.toString());
+        try {
+            url = new URL("http://localhost:8080/");
+            optimizeConnection();
+            sendRequest("POST", dataToSend);
+            StringBuilder response = getResponse();
+            System.out.println(response);
+            return Integer.parseInt(response.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return -1;
     }
 
     /**
@@ -122,6 +128,7 @@ class SimpleHttpClient {
      * @throws IOException
      */
     private StringBuilder getResponse() throws IOException {
+        System.out.println("receiving data!!");
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
         String inputLine;
         StringBuilder response = new StringBuilder();
@@ -140,6 +147,7 @@ class SimpleHttpClient {
      * @throws IOException
      */
     private void sendRequest(String requestMethod, String dataToSend) throws IOException {
+        System.out.println("sending data!!");
         con.setRequestMethod(requestMethod);
         OutputStream out = con.getOutputStream();
         out.write(dataToSend.getBytes());
